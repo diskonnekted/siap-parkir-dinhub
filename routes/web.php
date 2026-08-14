@@ -69,9 +69,18 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     // Cetak SK Routes
     Route::get('cetak/perorangan', [CetakController::class, 'perorangan'])->name('cetak.perorangan');
     Route::get('cetak/perorangan_read/{id}', [CetakController::class, 'perorangan_read'])->name('cetak.perorangan_read');
+    Route::get('cetak/perorangan_add', [CetakController::class, 'perorangan_add'])->name('cetak.perorangan_add');
+    Route::post('cetak/perorangan_add_action', [CetakController::class, 'perorangan_add_action'])->name('cetak.perorangan_add_action');
+    Route::get('cetak/perorangan_update/{id}', [CetakController::class, 'perorangan_update'])->name('cetak.perorangan_update');
+    Route::post('cetak/perorangan_update_action/{id}', [CetakController::class, 'perorangan_update_action'])->name('cetak.perorangan_update_action');
     Route::get('cetak/perorangan_delete/{id}', [CetakController::class, 'perorangan_delete'])->name('cetak.perorangan_delete');
+
     Route::get('cetak/badan', [CetakController::class, 'badan'])->name('cetak.badan');
     Route::get('cetak/badan_read/{id}', [CetakController::class, 'badan_read'])->name('cetak.badan_read');
+    Route::get('cetak/badan_add', [CetakController::class, 'badan_add'])->name('cetak.badan_add');
+    Route::post('cetak/badan_add_action', [CetakController::class, 'badan_add_action'])->name('cetak.badan_add_action');
+    Route::get('cetak/badan_update/{id}', [CetakController::class, 'badan_update'])->name('cetak.badan_update');
+    Route::post('cetak/badan_update_action/{id}', [CetakController::class, 'badan_update_action'])->name('cetak.badan_update_action');
     Route::get('cetak/badan_delete/{id}', [CetakController::class, 'badan_delete'])->name('cetak.badan_delete');
 
     // Titik Parkir Routes

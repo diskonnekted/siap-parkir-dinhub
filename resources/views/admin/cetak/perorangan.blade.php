@@ -30,7 +30,7 @@
             </div>
           </div>
           <div class="col-md-4 text-md-right" style="margin-top:10px;">
-            <a href="#" class="btn btn-light btn-sm"><i class="fa fa-plus"></i> Tambah</a>
+            <a href="{{ route('admin.cetak.perorangan_add') }}" class="btn btn-light btn-sm"><i class="fa fa-plus"></i> Tambah</a>
           </div>
         </div>
       </div>
@@ -64,7 +64,7 @@
                   <td><b>{!! $row->printed == 1 ? "<i class='icon-check'></i>" : "<i class='icon-close'></i>" !!}</b></td>
                   <td class="skp-actions-td">
                     <a href="{{ route('admin.cetak.perorangan_read', $row->id_sk_perorangan) }}" class="btn btn-warning btn-sm" title="detail"><i class="fa fa-eye"></i></a>
-                    <a href="#" class="btn btn-warning btn-sm" title="update"><i class="fa fa-pencil"></i></a>
+                    <a href="{{ route('admin.cetak.perorangan_update', $row->id_sk_perorangan) }}" class="btn btn-warning btn-sm" title="update"><i class="fa fa-pencil"></i></a>
                     <a href="{{ route('admin.cetak.perorangan_delete', $row->id_sk_perorangan) }}" class="btn btn-danger btn-sm" title="delete" onclick="return confirm('Apakah Anda yakin akan menghapus data ini?')"><i class="fa fa-trash"></i></a>
                     <a href="#" class="btn btn-success btn-sm" title="print" target="_blank"><i class="fa fa-print"></i></a>
                   </td>
