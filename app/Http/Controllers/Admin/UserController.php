@@ -10,7 +10,7 @@ class UserController extends Controller
 {
     public function index()
     {
-        $res = DB::table('users')->where('level', 'admin')->get();
+        $res = DB::table('users')->get();
         return view('admin.users.index', compact('res'));
     }
 
@@ -32,6 +32,7 @@ class UserController extends Controller
             'username' => '',
             'email' => '',
             'nama' => '',
+            'level' => 'admin',
             'password' => '',
         ]);
     }
@@ -42,6 +43,7 @@ class UserController extends Controller
             'username' => 'required|unique:users,username',
             'email' => 'required|email',
             'nama' => 'required',
+            'level' => 'required|in:admin,pengelola',
             'password' => 'required|min:5',
             'passwordconf' => 'required|same:password',
         ]);
@@ -51,7 +53,7 @@ class UserController extends Controller
             'email' => $request->input('email'),
             'nama' => $request->input('nama'),
             'password' => md5($request->input('password')),
-            'level' => 'admin',
+            'level' => $request->input('level'),
             'actived' => 1,
         ]);
 
@@ -72,6 +74,7 @@ class UserController extends Controller
             'username' => old('username', $row->username),
             'email' => old('email', $row->email),
             'nama' => old('nama', $row->nama),
+            'level' => old('level', $row->level),
             'password' => '',
         ]);
     }
@@ -82,12 +85,14 @@ class UserController extends Controller
             'username' => 'required|unique:users,username,' . $id . ',id_users',
             'email' => 'required|email',
             'nama' => 'required',
+            'level' => 'required|in:admin,pengelola',
         ]);
 
         $data = [
             'username' => $request->input('username'),
             'email' => $request->input('email'),
             'nama' => $request->input('nama'),
+            'level' => $request->input('level'),
         ];
 
         if ($request->filled('password')) {

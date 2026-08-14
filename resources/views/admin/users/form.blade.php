@@ -53,6 +53,15 @@
                         <input type="password" class="form-control" name="passwordconf" {{ $button == 'Tambah' ? 'required' : '' }}>
                         </fieldset>
                     </div>
+                    <div class="col-lg-4">
+                        <fieldset class="form-group">
+                        <label>Level / Peran @error('level') <span class="text-danger">({{ $message }})</span> @enderror</label>
+                        <select class="form-control" name="level" required>
+                            <option value="admin" {{ (isset($level) && $level == 'admin') ? 'selected' : '' }}>Admin</option>
+                            <option value="pengelola" {{ (isset($level) && $level == 'pengelola') ? 'selected' : '' }}>Pengelola</option>
+                        </select>
+                        </fieldset>
+                    </div>
                 </div>
                 
                 <div class="row m-t-20">

@@ -49,16 +49,18 @@
       </div>
   </div>
   
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
   <script type="text/javascript">
-  document.addEventListener("DOMContentLoaded", function() {
+  (function() {
       var fromLat = {{ !empty($row->from_lat) ? $row->from_lat : -7.3932652 }};
       var fromLng = {{ !empty($row->from_lng) ? $row->from_lng : 109.7097441 }};
       var toLat = {{ !empty($row->to_lat) ? $row->to_lat : -7.3932652 }};
       var toLng = {{ !empty($row->to_lng) ? $row->to_lng : 109.7097441 }};
+
+      // Reset map container if already initialized
+      var container = L.DomUtil.get('map');
+      if (container !== null) {
+          container._leaflet_id = null;
+      }
 
       var map = L.map('map').setView([fromLat, fromLng], 14);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
@@ -79,13 +81,23 @@
           document.getElementById("lng").value = e.latlng.lng;
       });
 
-      L.Routing.control({
+      var routingControl = L.Routing.control({
           waypoints: [L.latLng(fromLat, fromLng), L.latLng(toLat, toLng)],
           lineOptions: {styles: [{color: 'blue', opacity: 0.6, weight: 4}]},
           createMarker: function() { return null; },
           addWaypoints: false, routeWhileDragging: false, show: false
       }).addTo(map);
-  });
+
+      routingControl.on('routingerror', function(e) {
+          console.warn('Routing error caught: ', e.error);
+          L.polyline([[fromLat, fromLng], [toLat, toLng]], {color: 'blue', opacity: 0.5, weight: 3, dashArray: '5, 10'}).addTo(map);
+      });
+
+      // Recalculate map size after PJAX DOM update transitions
+      setTimeout(function() {
+          map.invalidateSize();
+      }, 250);
+  })();
   </script>
 </div>
 @endsection

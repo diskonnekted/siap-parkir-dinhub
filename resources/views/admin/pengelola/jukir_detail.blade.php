@@ -115,8 +115,8 @@
                           <div class="text-right col-md-3"><strong>Foto :</strong></div>
                           <div class="col-md-9">
                               @if($row2->foto)
-                                <a href="{{ asset($row2->foto) }}" target="_blank">
-                                <img src="{{ asset($row2->foto) }}" width="80px" height="80px" style="border-radius:8px; object-fit:cover; border:1px solid #ddd;">
+                                <a href="{{ asset(ltrim($row2->foto, './')) }}" target="_blank">
+                                <img src="{{ asset(ltrim($row2->foto, './')) }}" width="80px" height="80px" style="border-radius:8px; object-fit:cover; border:1px solid #ddd;">
                                 </a>
                               @else
                                 -
@@ -127,8 +127,8 @@
                          <div class="text-right col-md-3"><strong>Foto KTP :</strong></div>
                           <div class="col-md-9">
                               @if($row2->foto_ktp)
-                                <a href="{{ asset($row2->foto_ktp) }}" target="_blank">
-                                <img src="{{ asset($row2->foto_ktp) }}" width="80px" height="80px" style="border-radius:8px; object-fit:cover; border:1px solid #ddd;">
+                                <a href="{{ asset(ltrim($row2->foto_ktp, './')) }}" target="_blank">
+                                <img src="{{ asset(ltrim($row2->foto_ktp, './')) }}" width="80px" height="80px" style="border-radius:8px; object-fit:cover; border:1px solid #ddd;">
                                 </a>
                               @else
                                 -

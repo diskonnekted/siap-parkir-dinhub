@@ -41,6 +41,12 @@
 
   <script src="{{ asset('template/js/jquery.min.js') }}"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Leaflet Map Assets -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 </head>
 <body class="skin-blue sidebar-mini">
 <div class="wrapper boxed-wrapper">
@@ -287,12 +293,20 @@ if (typeof window.Tether === 'undefined') {
             type: 'GET',
             dataType: 'html',
             success: function(response) {
-                var tempDom = $('<div/>').append($.parseHTML(response));
+                // Keep scripts from executing automatically during parse
+                var tempDom = $('<div/>').append($.parseHTML(response, document, true));
                 var newTitle = tempDom.find('title').text();
-                var newContent = tempDom.find('.content-wrapper').html();
+                var contentWrapper = tempDom.find('.content-wrapper');
                 
-                if (newContent) {
+                if (contentWrapper.length) {
+                    // Extract and remove scripts to prevent automatic execution by jQuery
+                    var scripts = contentWrapper.find('script');
+                    scripts.remove();
+                    
+                    var newContent = contentWrapper.html();
                     document.title = newTitle;
+                    
+                    // Insert content and restore opacity
                     $('.content-wrapper').html(newContent).css('opacity', '1');
                     
                     if (pushState) {
@@ -311,7 +325,19 @@ if (typeof window.Tether === 'undefined') {
                         parentTreeView.find('.treeview-menu').show();
                     }
                     
-                    // Reinitialize script plugins
+                    // Execute scripts manually now that the DOM element is fully appended and ready
+                    scripts.each(function() {
+                        var scriptText = $(this).text();
+                        if (scriptText) {
+                            try {
+                                $.globalEval(scriptText);
+                            } catch (e) {
+                                console.error("Script execution error: ", e);
+                            }
+                        }
+                    });
+                    
+                    // Reinitialize script plugins (like Datatables)
                     reinitializeScripts();
                 } else {
                     window.location.href = url;
@@ -354,19 +380,6 @@ if (typeof window.Tether === 'undefined') {
         if (!isDashboard && ($('#datatable').length || $('#datatable2').length)) {
             $('.content-header.sty-one').hide();
         }
-        
-        // Re-execute scripts inside the new content wrapper
-        $('.content-wrapper script').each(function() {
-            var scriptText = $(this).text();
-            if (scriptText) {
-                try {
-                    // Evaluate inline script in global scope
-                    $.globalEval(scriptText);
-                } catch (e) {
-                    console.error("Script execution error: ", e);
-                }
-            }
-        });
     }
   });
 </script>

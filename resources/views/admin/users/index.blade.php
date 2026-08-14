@@ -23,14 +23,15 @@
         <div class="row">
           <div class="col-md-8">
             <h4>Users</h4>
-            <div class="users-sub">Manajemen akun admin, reset password, dan aktivasi.</div>
+            <div class="users-sub">Manajemen akun pengguna sistem (Admin &amp; Pengelola).</div>
             <div class="users-actions">
               <span class="users-pill"><i class="fa fa-users"></i> Total: {{ $res->count() }}</span>
-              <span class="users-pill"><i class="fa fa-shield"></i> Admin</span>
+              <span class="users-pill"><i class="fa fa-shield"></i> Admin: {{ $res->where('level', 'admin')->count() }}</span>
+              <span class="users-pill"><i class="fa fa-user"></i> Pengelola: {{ $res->where('level', 'pengelola')->count() }}</span>
             </div>
           </div>
           <div class="col-md-4 text-md-right" style="margin-top:10px;">
-            <a href="{{ route('admin.users.add') }}" class="btn btn-light btn-sm"><i class="fa fa-plus"></i> Tambah Admin</a>
+            <a href="{{ route('admin.users.add') }}" class="btn btn-light btn-sm"><i class="fa fa-plus"></i> Tambah User</a>
           </div>
         </div>
       </div>
