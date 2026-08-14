@@ -145,7 +145,7 @@
       <div class="col-lg-4 col-md-6">
         <div class="card border-0 shadow-sm p-4 rounded-4 text-center h-100">
           <h4 class="text-slate-500 mb-2">Sepeda Motor</h4>
-          <div class="display-6 fw-bold mb-3 text-primary">Rp 1.000</div>
+          <div class="display-6 fw-bold mb-3 text-primary">Rp 2.000</div>
           <ul class="list-unstyled text-start mb-4 border-top pt-3">
             <li class="mb-2"><i class="bi bi-check2 text-success me-2"></i> Motor Bebek &amp; Matic</li>
             <li class="mb-2"><i class="bi bi-check2 text-success me-2"></i> Motor Sport</li>
@@ -157,7 +157,7 @@
         <div class="card border-0 shadow-sm p-4 rounded-4 text-center h-100" style="border: 2px solid var(--primary) !important;">
           <span class="badge bg-primary text-white mx-auto px-3 py-2 rounded-pill mb-3" style="width: fit-content;">Paling Umum</span>
           <h4 class="text-slate-500 mb-2">Mobil / Minibus</h4>
-          <div class="display-6 fw-bold mb-3 text-primary">Rp 2.000</div>
+          <div class="display-6 fw-bold mb-3 text-primary">Rp 4.000</div>
           <ul class="list-unstyled text-start mb-4 border-top pt-3">
             <li class="mb-2"><i class="bi bi-check2 text-success me-2"></i> Mobil Sedan &amp; Hatchback</li>
             <li class="mb-2"><i class="bi bi-check2 text-success me-2"></i> SUV &amp; MPV (Keluarga)</li>
@@ -168,7 +168,7 @@
       <div class="col-lg-4 col-md-6">
         <div class="card border-0 shadow-sm p-4 rounded-4 text-center h-100">
           <h4 class="text-slate-500 mb-2">Bus &amp; Truk Berat</h4>
-          <div class="display-6 fw-bold mb-3 text-primary">Rp 4.000</div>
+          <div class="display-6 fw-bold mb-3 text-primary">Rp 6.000</div>
           <ul class="list-unstyled text-start mb-4 border-top pt-3">
             <li class="mb-2"><i class="bi bi-check2 text-success me-2"></i> Bus Pariwisata / Angkutan</li>
             <li class="mb-2"><i class="bi bi-check2 text-success me-2"></i> Truk Muatan (Double)</li>
