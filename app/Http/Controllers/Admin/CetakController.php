@@ -42,8 +42,8 @@ class CetakController extends Controller
 
     public function perorangan_add()
     {
-        $tahun_active = DB::table('tahun')->where('aktif', 1)->first();
-        $tahun = $tahun_active ? $tahun_active->tahun : date('Y');
+        $tahun_active = DB::table('tahun_pengelolaan')->where('actived', 1)->first();
+        $tahun = $tahun_active ? $tahun_active->tahun_pengelolaan : date('Y');
 
         $arr_perorangan = DB::table('pengelola_perorangan as pp')
             ->select('pp.id_pengelola_perorangan', 'pp.nama', 'wd.nama as desa')
@@ -203,8 +203,8 @@ class CetakController extends Controller
 
     public function badan_add()
     {
-        $tahun_active = DB::table('tahun')->where('aktif', 1)->first();
-        $tahun = $tahun_active ? $tahun_active->tahun : date('Y');
+        $tahun_active = DB::table('tahun_pengelolaan')->where('actived', 1)->first();
+        $tahun = $tahun_active ? $tahun_active->tahun_pengelolaan : date('Y');
 
         $arr_badan = DB::table('pengelola_badan as pb')
             ->select('pb.id_pengelola_badan', 'pb.nama_badan', 'wd.nama as desa')
@@ -328,5 +328,89 @@ class CetakController extends Controller
     {
         DB::table('sk_badan')->where('id_sk_badan', $id)->delete();
         return redirect()->route('admin.cetak.badan')->with('message', 'Data berhasil dihapus');
+    }
+
+    public function perorangan_cetak($id)
+    {
+        $row = DB::table('sk_perorangan as sp')
+            ->select('sp.*', 'pp.nama', 'pp.nik', 'pp.domisili_alamat', 'pp.domisili_rt', 'pp.domisili_rw', 'wd.nama as desa', 'wc.nama as kec', 'wk.nama as kab')
+            ->join('pengelola_perorangan as pp', 'pp.id_pengelola_perorangan', '=', 'sp.id_pengelola_perorangan')
+            ->leftJoin('wilayah_desa as wd', 'wd.id', '=', 'pp.domisili_id_desa')
+            ->leftJoin('wilayah_kecamatan as wc', 'wc.id', '=', 'pp.domisili_id_kecamatan')
+            ->leftJoin('wilayah_kabupaten as wk', 'wk.id', '=', 'pp.domisili_id_kabupaten')
+            ->where('id_sk_perorangan', $id)
+            ->first();
+
+        if (!$row) {
+            return redirect()->route('admin.cetak.perorangan')->with('message', 'Data tidak ditemukan');
+        }
+
+        $tahun_active = DB::table('tahun_pengelolaan')->where('actived', 1)->first();
+        $tahun = $tahun_active ? $tahun_active->tahun_pengelolaan : date('Y');
+
+        $row2 = DB::table('pejabat')
+            ->where('tahun_pengelolaan', $tahun)
+            ->orderBy('actived', 'DESC')
+            ->orderBy('id_pejabat', 'DESC')
+            ->first();
+
+        if (!$row2) {
+            $row2 = DB::table('pejabat')
+                ->where('actived', 1)
+                ->orderBy('id_pejabat', 'DESC')
+                ->first();
+        }
+
+        if (!$row2) {
+            $row2 = DB::table('pejabat')
+                ->orderBy('id_pejabat', 'DESC')
+                ->first();
+        }
+
+        DB::table('sk_perorangan')->where('id_sk_perorangan', $id)->update(['printed' => 1]);
+
+        return view('admin.cetak.perorangan_sk', compact('row', 'row2'));
+    }
+
+    public function badan_cetak($id)
+    {
+        $row = DB::table('sk_badan as sb')
+            ->select('sb.*', 'pb.nama_badan', 'pb.npwp', 'pb.pengurus_nama', 'pb.pengurus_jabatan', 'pb.alamat_kantor', 'pb.rt', 'pb.rw', 'wd.nama as desa', 'wc.nama as kec', 'wk.nama as kab')
+            ->join('pengelola_badan as pb', 'pb.id_pengelola_badan', '=', 'sb.id_pengelola_badan')
+            ->leftJoin('wilayah_desa as wd', 'wd.id', '=', 'pb.id_desa')
+            ->leftJoin('wilayah_kecamatan as wc', 'wc.id', '=', 'pb.id_kecamatan')
+            ->leftJoin('wilayah_kabupaten as wk', 'wk.id', '=', 'pb.id_kabupaten')
+            ->where('id_sk_badan', $id)
+            ->first();
+
+        if (!$row) {
+            return redirect()->route('admin.cetak.badan')->with('message', 'Data tidak ditemukan');
+        }
+
+        $tahun_active = DB::table('tahun_pengelolaan')->where('actived', 1)->first();
+        $tahun = $tahun_active ? $tahun_active->tahun_pengelolaan : date('Y');
+
+        $row2 = DB::table('pejabat')
+            ->where('tahun_pengelolaan', $tahun)
+            ->orderBy('actived', 'DESC')
+            ->orderBy('id_pejabat', 'DESC')
+            ->first();
+
+        if (!$row2) {
+            $row2 = DB::table('pejabat')
+                ->where('actived', 1)
+                ->orderBy('id_pejabat', 'DESC')
+                ->first();
+        }
+
+        if (!$row2) {
+            $row2 = DB::table('pejabat')
+                ->orderBy('id_pejabat', 'DESC')
+                ->first();
+        }
+
+        DB::table('sk_badan')->where('id_sk_badan', $id)->update(['printed' => 1]);
+
+        return view('admin.cetak.badan_sk', compact('row', 'row2'));
     }
 }

@@ -152,7 +152,7 @@
         <li class="treeview"> <a href="#"> <i class="fa fa-map-marker"></i> <span>Lokasi Parkir</span> <span class="pull-right-container"> <i class="fa fa-angle-left pull-right"></i> </span> </a>
           <ul class="treeview-menu">
             <li><a href="{{ route('admin.titik.index') }}">Titik Parkir</a></li>
-            <li><a href="#">Titik Juru Parkir</a></li>
+            <li><a href="{{ route('admin.titikjukir.index') }}">Titik Juru Parkir</a></li>
           </ul>
         </li>
         <li class="treeview"> <a href="#"> <i class="fa fa-bullhorn"></i> <span>Pengaduan</span> <span class="pull-right-container"> <i class="fa fa-angle-left pull-right"></i> </span> </a>

@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\PengaduanController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\TahunController;
 use App\Http\Controllers\Admin\PejabatController;
+use App\Http\Controllers\Admin\TitikjukirController;
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('home', [AdminHomeController::class, 'index'])->name('home');
@@ -74,6 +75,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('cetak/perorangan_update/{id}', [CetakController::class, 'perorangan_update'])->name('cetak.perorangan_update');
     Route::post('cetak/perorangan_update_action/{id}', [CetakController::class, 'perorangan_update_action'])->name('cetak.perorangan_update_action');
     Route::get('cetak/perorangan_delete/{id}', [CetakController::class, 'perorangan_delete'])->name('cetak.perorangan_delete');
+    Route::get('cetak/perorangan_cetak/{id}', [CetakController::class, 'perorangan_cetak'])->name('cetak.perorangan_cetak');
 
     Route::get('cetak/badan', [CetakController::class, 'badan'])->name('cetak.badan');
     Route::get('cetak/badan_read/{id}', [CetakController::class, 'badan_read'])->name('cetak.badan_read');
@@ -82,11 +84,26 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('cetak/badan_update/{id}', [CetakController::class, 'badan_update'])->name('cetak.badan_update');
     Route::post('cetak/badan_update_action/{id}', [CetakController::class, 'badan_update_action'])->name('cetak.badan_update_action');
     Route::get('cetak/badan_delete/{id}', [CetakController::class, 'badan_delete'])->name('cetak.badan_delete');
+    Route::get('cetak/badan_cetak/{id}', [CetakController::class, 'badan_cetak'])->name('cetak.badan_cetak');
 
     // Titik Parkir Routes
     Route::get('titik', [TitikController::class, 'index'])->name('titik.index');
     Route::get('titik/read/{id}', [TitikController::class, 'read'])->name('titik.read');
     Route::get('titik/delete/{id}', [TitikController::class, 'delete'])->name('titik.delete');
+
+    // Titik Juru Parkir Routes
+    Route::get('titikjukir', [TitikjukirController::class, 'index'])->name('titikjukir.index');
+    Route::get('titikjukir/read/{id}', [TitikjukirController::class, 'read'])->name('titikjukir.read');
+    Route::get('titikjukir/add', [TitikjukirController::class, 'add'])->name('titikjukir.add');
+    Route::post('titikjukir/add_action', [TitikjukirController::class, 'add_action'])->name('titikjukir.add_action');
+    Route::get('titikjukir/update/{id}', [TitikjukirController::class, 'update'])->name('titikjukir.update');
+    Route::post('titikjukir/update_action/{id}', [TitikjukirController::class, 'update_action'])->name('titikjukir.update_action');
+    Route::get('titikjukir/delete/{id}', [TitikjukirController::class, 'delete'])->name('titikjukir.delete');
+    Route::get('titikjukir/kta/{id}', [TitikjukirController::class, 'kta'])->name('titikjukir.kta');
+    Route::get('titikjukir/spt/{id}', [TitikjukirController::class, 'spt'])->name('titikjukir.spt');
+    Route::post('titikjukir/spt_action', [TitikjukirController::class, 'spt_action'])->name('titikjukir.spt_action');
+    Route::get('titikjukir/sptcetak/{id}', [TitikjukirController::class, 'sptcetak'])->name('titikjukir.sptcetak');
+    Route::get('titikjukir/titik_json/{id}', [TitikjukirController::class, 'titik_json'])->name('titikjukir.titik_json');
 
     // Ruas Jalan Routes
     Route::get('jalan', [JalanController::class, 'index'])->name('jalan.index');
