@@ -1,59 +1,102 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SIAP (Sistem Informasi Aplikasi Parkir) &bull; Dinhub Banjarnegara
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+[![Laravel Version](https://img.shields.io/badge/Laravel-v11.x-FF2D20?logo=laravel&logoColor=white)](https://laravel.com)
+[![MySQL Database](https://img.shields.io/badge/Database-MySQL-4479A1?logo=mysql&logoColor=white)](https://mysql.com)
+[![Leaflet Mapping](https://img.shields.io/badge/Mapping-Leaflet.js-199900?logo=leaflet&logoColor=white)](https://leafletjs.com)
+[![Chart.js Stats](https://img.shields.io/badge/Charts-Chart.js-FF6384?logo=chartdotjs&logoColor=white)](https://www.chartjs.org)
 
-## About Laravel
+**SIAP** adalah sistem informasi manajemen pelayanan perparkiran terpadu yang dirancang untuk **Dinas Perhubungan Kabupaten Banjarnegara**. Sistem ini bertindak sebagai jembatan informasi antara regulator (Dinhub), pengelola parkir (perorangan/badan usaha), juru parkir (petugas lapangan), dan masyarakat umum (publik).
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Sistem ini bermigrasi dari arsitektur lama berbasis **CodeIgniter 3** ke **Laravel** modern guna meningkatkan performa, skalabilitas, keamanan, serta menghadirkan pengalaman pengguna yang jauh lebih baik (UI/UX Promax).
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 🚀 Fitur Utama
 
-## Learning Laravel
+### 🌐 Halaman Publik (Landing Page)
+* **Visual Premium:** Desain responsif, modern, dan minimalis dengan integrasi tipografi Google Fonts (*Plus Jakarta Sans* & *Inter*).
+* **Tarif Resmi Transparan:** Informasi tarif parkir resmi berdasarkan Peraturan Daerah (Motor, Mobil, Alat Berat).
+* **Portal Pengaduan Publik:** Memungkinkan masyarakat melaporkan jukir liar, penyalahgunaan tarif, atau masalah perparkiran secara instan tanpa login.
+* **Publikasi Tindak Lanjut:** Menampilkan status aduan warga beserta jawaban resmi/solusi dari pihak Dinhub.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### 📊 Dashboard Administrator & Pengelola
+* **Statistik Visual Dinamis:** Integrasi **Chart.js** untuk grafik volume kendaraan harian (Motor & Mobil) dan bagan distribusi data pengelola.
+* **SPA Feel (Single Page App):** Mekanisme navigasi mulus menggunakan **PJAX**. Berpindah halaman atau menu sidebar tidak lagi memicu reload penuh browser, menghilangkan efek kedipan putih secara total.
+* **Pemetaan Interaktif (Leaflet.js):** Plotting koordinat ruas jalan, penentuan titik parkir awal/akhir, dan penempatan penanda posisi juru parkir langsung pada peta.
+* **Manajemen Pengelola:** Validasi berkas izin usaha, foto KTP, dan registrasi akun untuk pengelola kategori Perorangan serta Badan Usaha.
+* **Cetak SK & Administrasi:** Fitur pencetakan Surat Ketetapan (SK) resmi untuk legalitas operasional titik parkir.
+* **Master Data Terpusat:** Pengaturan akun admin, tahun pengelolaan aktif, dan data pejabat penandatangan resmi.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## 🛠️ Spesifikasi Teknis
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+| Komponen | Teknologi / Keterangan |
+| :--- | :--- |
+| **Framework Core** | Laravel 11.x |
+| **Bahasa Pemrograman** | PHP 8.x |
+| **Database Engine** | MariaDB / MySQL 5.7+ |
+| **Front-End Styling** | Bootstrap 5.3 (Publik) & Bootstrap 4 / AdminLTE Theme (Admin) |
+| **Peta Digital** | Leaflet.js (OpenStreetMap) |
+| **Visualisasi Data** | Chart.js (Line & Doughnut Charts) |
+| **Transisi Halaman** | Custom jQuery PJAX Engine (Zero-flash page swapping) |
+| **Autentikasi** | Standard Laravel Session Guard & MD5 Password Hash Compatibility |
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## ⚙️ Petunjuk Instalasi Lokal
 
-## Contributing
+### 1. Prasyarat
+Pastikan server lokal Anda (XAMPP/Laragon) telah terinstal:
+* PHP >= 8.2
+* Composer
+* MySQL / MariaDB Server
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 2. Kloning Repositori
+```bash
+git clone https://github.com/diskonnekted/siap-parkir-dinhub.git
+cd siap-parkir-dinhub
+```
 
-## Code of Conduct
+### 3. Instalasi Dependensi
+```bash
+composer install
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 4. Konfigurasi Environment
+Salin file `.env.example` menjadi `.env`:
+```bash
+cp .env.example .env
+```
+Buka file `.env` dan sesuaikan pengaturan database Anda:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=onlinkid_parkir
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-## Security Vulnerabilities
+### 5. Generate Application Key
+```bash
+php artisan key:generate
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 6. Impor Database
+1. Buat database baru di MySQL dengan nama `onlinkid_parkir`.
+2. Impor file backup `PARKIR.sql` yang berada di folder root/projek asal ke database `onlinkid_parkir`.
 
-## License
+### 7. Jalankan Server Lokal
+```bash
+php artisan serve --port=8081
+```
+Aplikasi kini dapat diakses di browser melalui tautan:
+* **Halaman Publik:** `http://localhost:8081/`
+* **Dashboard Admin:** `http://localhost:8081/admin/login` (Gunakan kredensial default admin/admin).
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## 👥 Kontributor & Hak Cipta
+* **Dinas Perhubungan Kabupaten Banjarnegara** - Pemilik Hak Cipta & Kebijakan
+* **Clasnet** ([clasnet.co.id](https://clasnet.co.id/)) - Pengembang Utama & Digitalisasi Sistem
