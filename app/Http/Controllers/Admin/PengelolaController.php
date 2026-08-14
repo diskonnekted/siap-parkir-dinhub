@@ -38,7 +38,12 @@ class PengelolaController extends Controller
             ->where('id_pengelola_perorangan', $id)
             ->first();
 
-        return view('admin.pengelola.perorangan_detail', compact('row1', 'row2'));
+        $sk = DB::table('sk_perorangan')
+            ->where('id_pengelola_perorangan', $id)
+            ->orderBy('id_sk_perorangan', 'DESC')
+            ->get();
+
+        return view('admin.pengelola.perorangan_detail', compact('row1', 'row2', 'sk'));
     }
 
     public function verifikasi_perorangan($id)
