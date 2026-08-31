@@ -7,6 +7,7 @@
     var mapAdd;
     var markerAdd;
     var lineAdd;
+    var routeReqId = 0;
 
     function ensureLeafletIcons() {
       delete L.Icon.Default.prototype._getIconUrl;
@@ -44,7 +45,27 @@
       var toLng = data.to_lng ? parseFloat(data.to_lng) : null;
 
       if (Number.isFinite(fromLat) && Number.isFinite(fromLng) && Number.isFinite(toLat) && Number.isFinite(toLng)) {
+        // Tampilkan garis lurus sebagai fallback awal
         lineAdd.setLatLngs([[fromLat, fromLng], [toLat, toLng]]);
+
+        // Ambil jalur jalan sesungguhnya dari OSM via OSRM
+        var reqId = ++routeReqId;
+        var osrmUrl = 'https://router.project-osrm.org/route/v1/driving/' +
+          fromLng + ',' + fromLat + ';' + toLng + ',' + toLat +
+          '?overview=full&geometries=geojson';
+
+        fetch(osrmUrl).then(function (r) { return r.json(); }).then(function (data) {
+          if (reqId !== routeReqId) return; // abaikan respon usang
+          if (data.code === 'Ok' && data.routes && data.routes.length) {
+            var coords = data.routes[0].geometry.coordinates.map(function (c) {
+              return [c[1], c[0]]; // GeoJSON [lng,lat] -> [lat,lng]
+            });
+            lineAdd.setLatLngs(coords);
+            mapAdd.fitBounds(L.latLngBounds(coords), { padding: [30, 30], maxZoom: 16 });
+          }
+        }).catch(function () {
+          // OSRM gagal: biarkan garis lurus
+        });
       } else {
         lineAdd.setLatLngs([]);
       }

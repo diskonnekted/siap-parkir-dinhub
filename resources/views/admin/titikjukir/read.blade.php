@@ -77,8 +77,11 @@
           <!-- Column 2: Titik Parkir Details & Location Map -->
           <div class="col-lg-8 col-md-7">
             <div class="card border-0" style="border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.04); border: 1px solid rgba(226, 232, 240, 0.8) !important; background: #fff;">
-              <div class="card-header bg-transparent border-0" style="padding: 20px 24px 10px 24px;">
+              <div class="card-header bg-transparent border-0" style="padding: 20px 24px 10px 24px; display:flex; justify-content:space-between; align-items:center;">
                 <h5 style="font-weight: 800; color: #0f172a; margin: 0;">Detail Lokasi &amp; Peta Penugasan</h5>
+                <a href="{{ url('admin/titik/update/' . $row->id_titik_parkir) }}" class="btn btn-warning btn-sm" style="border-radius:12px; font-weight:700; padding:8px 16px; font-size:13px;">
+                  <i class="fa fa-map-marker"></i> Edit Lokasi
+                </a>
               </div>
               <div class="card-body" style="padding: 10px 24px 24px 24px;">
                 
@@ -126,43 +129,89 @@
 
       </div>
     </div>
+
+    <script type="text/javascript">
+    $(function() {
+        var mapEl = document.getElementById('map');
+        if (!mapEl) return;
+
+        // Clear any existing Leaflet instance (PJAX navigation fix)
+        if (mapEl._leaflet_id) { mapEl._leaflet_id = null; }
+
+        var titikLat = {{ !empty($row->titik_lat) ? $row->titik_lat : -7.3932652 }};
+        var titikLng = {{ !empty($row->titik_lng) ? $row->titik_lng : 109.7097441 }};
+        var fromLat = {{ !empty($row->from_lat) ? $row->from_lat : -7.3932652 }};
+        var fromLng = {{ !empty($row->from_lng) ? $row->from_lng : 109.7097441 }};
+        var toLat = {{ !empty($row->to_lat) ? $row->to_lat : -7.3932652 }};
+        var toLng = {{ !empty($row->to_lng) ? $row->to_lng : 109.7097441 }};
+
+        var map = L.map('map').setView([titikLat, titikLng], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+
+        // Fix for Leaflet default icons
+        delete L.Icon.Default.prototype._getIconUrl;
+        L.Icon.Default.mergeOptions({
+            iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+            iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        });
+
+        // Marker at titik parkir location
+        var titikMarker = L.marker([titikLat, titikLng]).addTo(map).bindPopup("<b>{{ addslashes($row->nama_lokasi) }}</b>").openPopup();
+
+        // End-point markers for the road segment (ruas jalan)
+        if (Number.isFinite(parseFloat(fromLat)) && Number.isFinite(parseFloat(fromLng))) {
+            L.circleMarker([parseFloat(fromLat), parseFloat(fromLng)], {
+                radius: 6, color: '#16a34a', fillColor: '#16a34a', fillOpacity: 0.9, weight: 2
+            }).addTo(map).bindPopup('Titik Awal Ruas');
+        }
+        if (Number.isFinite(parseFloat(toLat)) && Number.isFinite(parseFloat(toLng))) {
+            L.circleMarker([parseFloat(toLat), parseFloat(toLng)], {
+                radius: 6, color: '#dc2626', fillColor: '#dc2626', fillOpacity: 0.9, weight: 2
+            }).addTo(map).bindPopup('Titik Akhir Ruas');
+        }
+
+        // Draw road segment following actual OSM road path via OSRM
+        var from = [parseFloat(fromLat), parseFloat(fromLng)];
+        var to = [parseFloat(toLat), parseFloat(toLng)];
+        var hasRoute = Number.isFinite(from[0]) && Number.isFinite(from[1]) &&
+                       Number.isFinite(to[0]) && Number.isFinite(to[1]) &&
+                       (from[0] !== to[0] || from[1] !== to[1]);
+
+        if (hasRoute) {
+            var routeLine = L.polyline([from, to], {
+                color: '#2563eb', weight: 5, opacity: 0.55, dashArray: '8, 6'
+            }).addTo(map);
+
+            var osrmUrl = 'https://router.project-osrm.org/route/v1/driving/' +
+                from[1] + ',' + from[0] + ';' + to[1] + ',' + to[0] +
+                '?overview=full&geometries=geojson';
+
+            fetch(osrmUrl).then(function (r) { return r.json(); }).then(function (data) {
+                if (data.code === 'Ok' && data.routes && data.routes.length) {
+                    var coords = data.routes[0].geometry.coordinates.map(function (c) {
+                        return [c[1], c[0]]; // GeoJSON [lng,lat] -> [lat,lng]
+                    });
+                    routeLine.remove();
+                    L.polyline(coords, {
+                        color: '#2563eb', weight: 6, opacity: 0.75
+                    }).addTo(map);
+                    // Fit view to cover the whole road segment + titik point
+                    var bounds = L.latLngBounds(coords);
+                    bounds.extend([titikLat, titikLng]);
+                    map.fitBounds(bounds, { padding: [30, 30], maxZoom: 17 });
+                }
+            }).catch(function () {
+                // OSRM gagal: biarkan garis lurus (fallback)
+            });
+        }
+
+        // Fix map size after PJAX render
+        setTimeout(function() { map.invalidateSize(); }, 300);
+    });
+    </script>
   </div>
-
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
-  <script type="text/javascript">
-  document.addEventListener("DOMContentLoaded", function() {
-      var fromLat = {{ !empty($row->from_lat) ? $row->from_lat : -7.3932652 }};
-      var fromLng = {{ !empty($row->from_lng) ? $row->from_lng : 109.7097441 }};
-      var toLat = {{ !empty($row->to_lat) ? $row->to_lat : -7.3932652 }};
-      var toLng = {{ !empty($row->to_lng) ? $row->to_lng : 109.7097441 }};
-      var titikLat = {{ !empty($row->titik_lat) ? $row->titik_lat : -7.3932652 }};
-      var titikLng = {{ !empty($row->titik_lng) ? $row->titik_lng : 109.7097441 }};
-
-      var map = L.map('map').setView([titikLat, titikLng], 15);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-      // Fix for Leaflet default icons when using CDN
-      delete L.Icon.Default.prototype._getIconUrl;
-      L.Icon.Default.mergeOptions({
-          iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-          iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-          shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-      });
-
-      L.marker([titikLat, titikLng]).addTo(map).bindPopup("<b>{{ addslashes($row->nama_lokasi) }}</b>").openPopup();
-
-      L.Routing.control({
-          waypoints: [L.latLng(fromLat, fromLng), L.latLng(toLat, toLng)],
-          lineOptions: {styles: [{color: 'blue', opacity: 0.6, weight: 4}]},
-          createMarker: function() { return null; },
-          addWaypoints: false, 
-          routeWhileDragging: false, 
-          show: false,
-          fitSelectedRoutes: false
-      }).addTo(map);
-  });
-  </script>
 @endsection

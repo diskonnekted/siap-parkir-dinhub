@@ -10,6 +10,7 @@ Route::get('/', [HomeController::class, 'index'])->name('public.home');
 Route::post('/pengaduan_action', [HomeController::class, 'pengaduan_action'])->name('public.pengaduan_action');
 
 Route::get('admin/login', [LoginController::class, 'index'])->name('admin.login');
+Route::get('login', function () { return redirect()->route('admin.login'); })->name('login');
 Route::post('admin/login/cek', [LoginController::class, 'cek'])->name('admin.login.cek');
 Route::get('admin/login/logout', [LoginController::class, 'logout'])->name('admin.logout');
 
@@ -26,6 +27,7 @@ use App\Http\Controllers\Admin\TitikjukirController;
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('home', [AdminHomeController::class, 'index'])->name('home');
+    Route::get('peta-json', [AdminHomeController::class, 'peta_json'])->name('peta_json');
 
     // Users Routes
     Route::get('users', [UserController::class, 'index'])->name('users.index');
@@ -89,7 +91,12 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     // Titik Parkir Routes
     Route::get('titik', [TitikController::class, 'index'])->name('titik.index');
     Route::get('titik/read/{id}', [TitikController::class, 'read'])->name('titik.read');
+    Route::get('titik/add', [TitikController::class, 'add'])->name('titik.add');
+    Route::post('titik/add_action', [TitikController::class, 'add_action'])->name('titik.add_action');
+    Route::get('titik/update/{id}', [TitikController::class, 'update'])->name('titik.update');
+    Route::post('titik/update_action/{id}', [TitikController::class, 'update_action'])->name('titik.update_action');
     Route::get('titik/delete/{id}', [TitikController::class, 'delete'])->name('titik.delete');
+    Route::get('titik/desa_json/{id}', [TitikController::class, 'desa_json'])->name('titik.desa_json');
 
     // Titik Juru Parkir Routes
     Route::get('titikjukir', [TitikjukirController::class, 'index'])->name('titikjukir.index');

@@ -30,7 +30,7 @@
             </div>
           </div>
           <div class="col-md-4 text-md-right" style="margin-top:10px;">
-            <a href="#" class="btn btn-light btn-sm"><i class="fa fa-plus"></i> Tambah</a>
+            <a href="{{ route('admin.titik.add') }}" class="btn btn-light btn-sm"><i class="fa fa-plus"></i> Tambah</a>
           </div>
         </div>
       </div>
@@ -69,7 +69,7 @@
                   <td>{{ $row->nama_ruas }}</td>                
                   <td class="tp-actions-td">
                     <a href="{{ route('admin.titik.read', $row->id_titik_parkir) }}" class="btn btn-warning btn-sm" title="read"><i class="fa fa-eye"></i></a>
-                    <a href="#" class="btn btn-warning btn-sm" title="update"><i class="fa fa-pencil"></i></a>
+                    <a href="{{ route('admin.titik.update', $row->id_titik_parkir) }}" class="btn btn-warning btn-sm" title="update"><i class="fa fa-pencil"></i></a>
                     <a href="{{ route('admin.titik.delete', $row->id_titik_parkir) }}" class="btn btn-danger btn-sm" title="delete" onclick="return confirm('Apakah Anda yakin akan menghapus data ini?')"><i class="fa fa-trash"></i></a>
                   </td>
                 </tr>

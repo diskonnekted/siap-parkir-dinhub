@@ -203,6 +203,191 @@
       });
     </script>
 
+    <!-- Peta Dashboard Row -->
+    <div class="row dash-grid">
+      <div class="col-lg-12">
+        <div class="card dash-card">
+          <div class="card-header bg-white">
+            <div class="row align-items-center">
+              <div class="col-md-6">
+                <h5 class="m-b-0 text-black"><i class="fa fa-map-marker text-danger"></i> Peta Titik Parkir &amp; Juru Parkir</h5>
+              </div>
+              <div class="col-md-6 text-md-right">
+                <div class="btn-group btn-group-sm" role="group">
+                  <button type="button" class="btn btn-outline-secondary active" id="btn-layer-all"><i class="fa fa-layer-group"></i> Semua</button>
+                  <button type="button" class="btn btn-outline-primary" id="btn-layer-titik"><i class="fa fa-map-pin"></i> Titik Parkir</button>
+                  <button type="button" class="btn btn-outline-success" id="btn-layer-jukir"><i class="fa fa-user-circle"></i> Jukir</button>
+                  <button type="button" class="btn btn-outline-warning" id="btn-layer-ruas"><i class="fa fa-road"></i> Ruas Jalan</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-body" style="padding:0;">
+            <div id="map-dashboard" style="height:500px;width:100%;border-radius:0 0 16px 16px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    $(function() {
+        var mapEl = document.getElementById('map-dashboard');
+        if (!mapEl) return;
+
+        // Fix Leaflet default icon
+        delete L.Icon.Default.prototype._getIconUrl;
+        L.Icon.Default.mergeOptions({
+            iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+            iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
+        });
+
+        // Prevent double-init
+        if (mapEl._leaflet_id) {
+            mapEl._leaflet_id = null;
+        }
+
+        var map = L.map('map-dashboard').setView([-7.3942, 109.5258], 11);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+
+        // Custom icons
+        var iconTitik = L.divIcon({
+            html: '<div style="background:#ef4444;width:20px;height:20px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4)"></div>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 20],
+            popupAnchor: [0, -20],
+            className: ''
+        });
+
+        var iconJukir = L.divIcon({
+            html: '<div style="background:#22c55e;width:20px;height:20px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4)"></div>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 20],
+            popupAnchor: [0, -20],
+            className: ''
+        });
+
+        var layerTitik = L.layerGroup().addTo(map);
+        var layerJukir = L.layerGroup();
+        var layerRuas = L.layerGroup();
+        var allBounds = L.latLngBounds();
+
+        // Load data
+        fetch('{{ url("admin/peta-json") }}')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+
+                // Ruas Jalan (polylines)
+                data.ruas_jalan.forEach(function(rj) {
+                    if (rj.from_lat && rj.from_lng && rj.to_lat && rj.to_lng) {
+                        var line = L.polyline([
+                            [parseFloat(rj.from_lat), parseFloat(rj.from_lng)],
+                            [parseFloat(rj.to_lat), parseFloat(rj.to_lng)]
+                        ], {
+                            color: '#f59e0b',
+                            weight: 3,
+                            opacity: 0.5
+                        });
+                        line.bindPopup('<b>' + rj.nama_ruas + '</b>');
+                        layerRuas.addLayer(line);
+                        allBounds.extend([[parseFloat(rj.from_lat), parseFloat(rj.from_lng)]]);
+                        allBounds.extend([[parseFloat(rj.to_lat), parseFloat(rj.to_lng)]]);
+                    }
+                });
+
+                // Titik Parkir
+                data.titik_parkir.forEach(function(tp) {
+                    if (!tp.titik_lat || !tp.titik_lng) return;
+                    var lat = parseFloat(tp.titik_lat);
+                    var lng = parseFloat(tp.titik_lng);
+                    var m = L.marker([lat, lng], { icon: iconTitik });
+                    var popupHtml = '<div style="min-width:180px">' +
+                        '<b>' + tp.nama_lokasi + '</b><br>' +
+                        '<small>Ruas: ' + (tp.nama_ruas || '-') + '</small><br>' +
+                        '<small>Koord: ' + lat.toFixed(6) + ', ' + lng.toFixed(6) + '</small><br>' +
+                        '<div style="margin-top:8px;display:flex;gap:6px">' +
+                        '<a href="' + '{{ url("admin/titik/update") }}' + '/' + tp.id_titik_parkir + '" class="btn btn-warning btn-sm" style="font-size:11px;padding:3px 8px"><i class="fa fa-pencil"></i> Edit Titik</a>' +
+                        '<a href="' + '{{ url("admin/titik/read") }}' + '/' + tp.id_titik_parkir + '" class="btn btn-info btn-sm" style="font-size:11px;padding:3px 8px"><i class="fa fa-eye"></i> Detail</a>' +
+                        '</div></div>';
+                    m.bindPopup(popupHtml);
+                    layerTitik.addLayer(m);
+                    allBounds.extend([[lat, lng]]);
+                });
+
+                // Titik Jukir
+                data.titik_jukir.forEach(function(tj) {
+                    if (!tj.titik_lat || !tj.titik_lng) return;
+                    var lat = parseFloat(tj.titik_lat);
+                    var lng = parseFloat(tj.titik_lng);
+                    var m = L.marker([lat, lng], { icon: iconJukir });
+                    var popupHtml = '<div style="min-width:180px">' +
+                        '<b>' + (tj.nama_jukir || 'Jukir #' + tj.id_juru_parkir) + '</b><br>' +
+                        '<small>Lokasi: ' + (tj.nama_lokasi || '-') + '</small><br>' +
+                        '<small>No. Jukir: ' + (tj.no_juru_parkir || '-') + '</small><br>' +
+                        '<div style="margin-top:8px;display:flex;gap:6px">' +
+                        '<a href="' + '{{ url("admin/titikjukir/update") }}' + '/' + tj.id_titik_jukir + '" class="btn btn-success btn-sm" style="font-size:11px;padding:3px 8px"><i class="fa fa-pencil"></i> Edit Jukir</a>' +
+                        '<a href="' + '{{ url("admin/titikjukir/read") }}' + '/' + tj.id_titik_jukir + '" class="btn btn-info btn-sm" style="font-size:11px;padding:3px 8px"><i class="fa fa-eye"></i> Detail</a>' +
+                        '</div></div>';
+                    m.bindPopup(popupHtml);
+                    layerJukir.addLayer(m);
+                });
+
+                // Fit bounds
+                if (allBounds.isValid()) {
+                    map.fitBounds(allBounds, { padding: [30, 30] });
+                }
+
+                // Show jukir layer by default too
+                layerJukir.addTo(map);
+            })
+            .catch(function(e) { console.error('Map data error:', e); });
+
+        // Layer toggle buttons
+        function setActiveBtn(id) {
+            ['btn-layer-all','btn-layer-titik','btn-layer-jukir','btn-layer-ruas'].forEach(function(b) {
+                document.getElementById(b).classList.remove('active');
+            });
+            document.getElementById(id).classList.add('active');
+        }
+
+        document.getElementById('btn-layer-all').addEventListener('click', function() {
+            layerTitik.addTo(map);
+            layerJukir.addTo(map);
+            layerRuas.addTo(map);
+            setActiveBtn('btn-layer-all');
+        });
+
+        document.getElementById('btn-layer-titik').addEventListener('click', function() {
+            map.removeLayer(layerJukir);
+            map.removeLayer(layerRuas);
+            layerTitik.addTo(map);
+            setActiveBtn('btn-layer-titik');
+        });
+
+        document.getElementById('btn-layer-jukir').addEventListener('click', function() {
+            map.removeLayer(layerTitik);
+            map.removeLayer(layerRuas);
+            layerJukir.addTo(map);
+            setActiveBtn('btn-layer-jukir');
+        });
+
+        document.getElementById('btn-layer-ruas').addEventListener('click', function() {
+            map.removeLayer(layerTitik);
+            map.removeLayer(layerJukir);
+            layerRuas.addTo(map);
+            setActiveBtn('btn-layer-ruas');
+        });
+
+        // Fix size after render
+        setTimeout(function() { map.invalidateSize(); }, 300);
+    });
+    </script>
+
+    <!-- Pengaduan Terbaru -->
     <div class="card dash-card" style="margin-top:16px;">
       <div class="card-header">
         <div class="row align-items-center">
