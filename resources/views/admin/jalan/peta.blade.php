@@ -81,16 +81,36 @@
           document.getElementById("lng").value = e.latlng.lng;
       });
 
-      var routingControl = L.Routing.control({
-          waypoints: [L.latLng(fromLat, fromLng), L.latLng(toLat, toLng)],
-          lineOptions: {styles: [{color: 'blue', opacity: 0.6, weight: 4}]},
-          createMarker: function() { return null; },
-          addWaypoints: false, routeWhileDragging: false, show: false
+      var routingControl = null;
+
+      // Markers: titik awal (hijau) & titik akhir (merah), tanpa popup mengganggu klik
+      L.circleMarker([fromLat, fromLng], {
+          radius: 7, color: '#16a34a', fillColor: '#16a34a', fillOpacity: 0.9, weight: 2
+      }).addTo(map);
+      L.circleMarker([toLat, toLng], {
+          radius: 7, color: '#dc2626', fillColor: '#dc2626', fillOpacity: 0.9, weight: 2
       }).addTo(map);
 
-      routingControl.on('routingerror', function(e) {
-          console.warn('Routing error caught: ', e.error);
-          L.polyline([[fromLat, fromLng], [toLat, toLng]], {color: 'blue', opacity: 0.5, weight: 3, dashArray: '5, 10'}).addTo(map);
+      // Gambar garis awal (putus-putus) sebagai fallback
+      var routeLine = L.polyline([[fromLat, fromLng], [toLat, toLng]], {
+          color: '#2563eb', weight: 5, opacity: 0.55, dashArray: '8, 6'
+      }).addTo(map);
+
+      // Fetch rute mengikuti jalan OSM via OSRM publik
+      var osrmUrl = 'https://router.project-osrm.org/route/v1/driving/' +
+          fromLng + ',' + fromLat + ';' + toLng + ',' + toLat +
+          '?overview=full&geometries=geojson';
+      fetch(osrmUrl).then(function(r) { return r.json(); }).then(function(data) {
+          if (data && data.code === 'Ok' && data.routes && data.routes.length) {
+              var coords = data.routes[0].geometry.coordinates.map(function(c) {
+                  return [c[1], c[0]];
+              });
+              routeLine.remove();
+              L.polyline(coords, { color: '#2563eb', weight: 6, opacity: 0.8 }).addTo(map);
+              map.fitBounds(L.latLngBounds(coords), { padding: [30, 30], maxZoom: 17 });
+          }
+      }).catch(function(e) {
+          console.warn('OSRM unavailable:', e);
       });
 
       // Recalculate map size after PJAX DOM update transitions

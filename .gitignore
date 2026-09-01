@@ -22,3 +22,16 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Local artifacts (not committed)
+/cadangan.txt
+/env.txt
+/database/dump_siap_filtered.sql
+/scripts/
+/siap parkir fix.code-workspace
+# Foto jukir & titik parkir besar-besar, tidak di-commit (dikelola terpisah)
+/public/uploads/
+# Sumber data foto jukir manual (sudah di-upload ke server)
+/public/data_baru/
+# Geojson desa (sangat besar, tidak dipakai oleh app)
+/public/peta_desa.geojson

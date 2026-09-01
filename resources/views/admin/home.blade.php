@@ -28,6 +28,23 @@
       .dash-tabs .nav-link.active{background:linear-gradient(135deg,#0ea5e9,#6366f1);color:#fff}
       .dash-badge{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 8px;border-radius:999px;font-size:12px;background:rgba(2,132,199,.12);color:#0f172a}
       .dash-badge--danger{background:rgba(239,68,68,.14)}
+      /* Label kecamatan di tengah polygon */
+      .kec-label {
+        background: rgba(255,255,255,0.78);
+        border: 1px solid rgba(15,23,42,0.18);
+        border-radius: 6px;
+        color: #0f172a;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 6px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        pointer-events: none;
+      }
+      .kec-label:before { display: none; }
+      /* Border kecamatan tetap solid meski map di-zoom out jauh */
+      .leaflet-overlay-pane svg path.kec-border {
+        vector-effect: non-scaling-stroke;
+      }
       .dash-grid{margin-left:-10px;margin-right:-10px}
       .dash-grid>[class*="col-"]{padding-left:10px;padding-right:10px;margin-bottom:16px}
       @media (max-width:576px){.dash-hero{padding:16px}.dash-actions{margin-top:12px}}
@@ -280,6 +297,7 @@
                   <button type="button" class="btn btn-outline-primary" id="btn-layer-titik"><i class="fa fa-map-pin"></i> Titik Parkir</button>
                   <button type="button" class="btn btn-outline-success" id="btn-layer-jukir"><i class="fa fa-user-circle"></i> Jukir</button>
                   <button type="button" class="btn btn-outline-warning" id="btn-layer-ruas"><i class="fa fa-road"></i> Ruas Jalan</button>
+                  <button type="button" class="btn btn-outline-dark active" id="btn-layer-batas" title="Batas Kecamatan Banjarnegara (selalu tampil sebagai panduan)"><i class="fa fa-draw-polygon"></i> Batas Kecamatan</button>
                 </div>
               </div>
             </div>
@@ -336,30 +354,128 @@
         var layerTitik = L.layerGroup().addTo(map);
         var layerJukir = L.layerGroup();
         var layerRuas = L.layerGroup();
+        var layerBatas = L.layerGroup(); // batas kecamatan (panduan)
         var allBounds = L.latLngBounds();
+        var batasBounds = L.latLngBounds();
+
+        // Load batas kecamatan (selalu tampil sebagai panduan)
+        fetch('{{ asset("peta_kecamatan.geojson") }}')
+            .then(function(r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
+            .then(function(gj) {
+                L.geoJSON(gj, {
+                    style: function() {
+                        return {
+                            color: '#0f172a',
+                            weight: 2,
+                            opacity: 0.75,
+                            fillColor: '#3b82f6',
+                            fillOpacity: 0.05,
+                            className: 'kec-border'
+                        };
+                    },
+                    onEachFeature: function(feature, lyr) {
+                        var name = (feature.properties && (feature.properties.Kecamatan || feature.properties.Name)) || '';
+                        if (name) {
+                            lyr.bindTooltip(
+                                name.charAt(0).toUpperCase() + name.slice(1),
+                                {
+                                    permanent: true,
+                                    direction: 'center',
+                                    className: 'kec-label'
+                                }
+                            );
+                        }
+                    }
+                }).addTo(layerBatas);
+                // Hitung bounds kumulatif untuk semua polygon kecamatan
+                layerBatas.eachLayer(function(l) {
+                    try { batasBounds.extend(l.getBounds()); } catch (e) {}
+                });
+                // Selalu tambahkan batas kecamatan ke peta (default aktif)
+                layerBatas.addTo(map);
+                // Jika belum ada data titik/ruas yang memfit, pakai bounds kecamatan
+                if (!allBounds.isValid() && batasBounds.isValid()) {
+                    map.fitBounds(batasBounds, { padding: [20, 20], maxZoom: 12 });
+                }
+            })
+            .catch(function(e) {
+                console.warn('Gagal memuat peta_kecamatan.geojson:', e);
+            });
 
         // Load data
         fetch('{{ url("admin/peta-json") }}')
             .then(function(r) { return r.json(); })
             .then(function(data) {
 
-                // Ruas Jalan (polylines)
+                // Ruas Jalan (polylines mengikuti jalan OSM via OSRM, fallback garis lurus)
+                var ruasList = [];
                 data.ruas_jalan.forEach(function(rj) {
-                    if (rj.from_lat && rj.from_lng && rj.to_lat && rj.to_lng) {
-                        var line = L.polyline([
-                            [parseFloat(rj.from_lat), parseFloat(rj.from_lng)],
-                            [parseFloat(rj.to_lat), parseFloat(rj.to_lng)]
-                        ], {
-                            color: '#f59e0b',
-                            weight: 3,
-                            opacity: 0.5
-                        });
-                        line.bindPopup('<b>' + rj.nama_ruas + '</b>');
-                        layerRuas.addLayer(line);
-                        allBounds.extend([[parseFloat(rj.from_lat), parseFloat(rj.from_lng)]]);
-                        allBounds.extend([[parseFloat(rj.to_lat), parseFloat(rj.to_lng)]]);
-                    }
+                    if (!rj.from_lat || !rj.from_lng || !rj.to_lat || !rj.to_lng) return;
+                    var fromLat = parseFloat(rj.from_lat), fromLng = parseFloat(rj.from_lng);
+                    var toLat = parseFloat(rj.to_lat), toLng = parseFloat(rj.to_lng);
+                    if (!isFinite(fromLat) || !isFinite(fromLng) || !isFinite(toLat) || !isFinite(toLng)) return;
+                    if (fromLat === toLat && fromLng === toLng) return;
+
+                    // Garis putus-putus fallback, ditambahkan ke layer dulu (akan diganti jika OSRM OK)
+                    var line = L.polyline([[fromLat, fromLng], [toLat, toLng]], {
+                        color: '#f59e0b',
+                        weight: 3,
+                        opacity: 0.55,
+                        dashArray: '6, 6'
+                    });
+                    line.bindPopup('<b>' + rj.nama_ruas + '</b>');
+                    layerRuas.addLayer(line);
+
+                    // Marker titik awal/akhir
+                    L.circleMarker([fromLat, fromLng], {
+                        radius: 4, color: '#16a34a', fillColor: '#16a34a', fillOpacity: 0.9, weight: 1
+                    }).addTo(layerRuas);
+                    L.circleMarker([toLat, toLng], {
+                        radius: 4, color: '#dc2626', fillColor: '#dc2626', fillOpacity: 0.9, weight: 1
+                    }).addTo(layerRuas);
+
+                    allBounds.extend([fromLat, fromLng]);
+                    allBounds.extend([toLat, toLng]);
+
+                    ruasList.push({ rj: rj, line: line, fromLat: fromLat, fromLng: fromLng, toLat: toLat, toLng: toLng });
                 });
+
+                // Fetch rute OSRM paralel dengan throttling (batch 6) untuk menghindari rate-limit
+                function osrmFetchOne(item) {
+                    var url = 'https://router.project-osrm.org/route/v1/driving/' +
+                        item.fromLng + ',' + item.fromLat + ';' + item.toLng + ',' + item.toLat +
+                        '?overview=full&geometries=geojson';
+                    return fetch(url).then(function(r) { return r.json(); }).then(function(data) {
+                        if (data && data.code === 'Ok' && data.routes && data.routes.length) {
+                            var coords = data.routes[0].geometry.coordinates.map(function(c) {
+                                return [c[1], c[0]]; // GeoJSON [lng,lat] -> [lat,lng]
+                            });
+                            // Ganti polyline fallback dengan rute OSM (solid)
+                            layerRuas.removeLayer(item.line);
+                            var newLine = L.polyline(coords, {
+                                color: '#f59e0b',
+                                weight: 4,
+                                opacity: 0.8
+                            });
+                            newLine.bindPopup('<b>' + item.rj.nama_ruas + '</b>');
+                            layerRuas.addLayer(newLine);
+                        }
+                    }).catch(function() {
+                        // Biarkan garis putus-putus sebagai fallback
+                    });
+                }
+
+                // Throttle: proses maks 6 request bersamaan, sisanya antri
+                (function processBatch(idx) {
+                    if (idx >= ruasList.length) return;
+                    var batch = ruasList.slice(idx, idx + 6);
+                    Promise.all(batch.map(osrmFetchOne)).finally(function() {
+                        processBatch(idx + 6);
+                    });
+                })(0);
 
                 // Titik Parkir
                 data.titik_parkir.forEach(function(tp) {
@@ -410,16 +526,26 @@
 
         // Layer toggle buttons
         function setActiveBtn(id) {
-            ['btn-layer-all','btn-layer-titik','btn-layer-jukir','btn-layer-ruas'].forEach(function(b) {
-                document.getElementById(b).classList.remove('active');
+            ['btn-layer-all','btn-layer-titik','btn-layer-jukir','btn-layer-ruas','btn-layer-batas'].forEach(function(b) {
+                var el = document.getElementById(b);
+                if (el) el.classList.remove('active');
             });
-            document.getElementById(id).classList.add('active');
+            var activeEl = document.getElementById(id);
+            if (activeEl) activeEl.classList.add('active');
+        }
+
+        // Batas kecamatan tetap di peta saat tombol layer lain dipilih (panduan)
+        function ensureBatasLayer() {
+            if (!map.hasLayer(layerBatas) && layerBatas.getLayers().length) {
+                layerBatas.addTo(map);
+            }
         }
 
         document.getElementById('btn-layer-all').addEventListener('click', function() {
             layerTitik.addTo(map);
             layerJukir.addTo(map);
             layerRuas.addTo(map);
+            ensureBatasLayer();
             setActiveBtn('btn-layer-all');
         });
 
@@ -427,6 +553,7 @@
             map.removeLayer(layerJukir);
             map.removeLayer(layerRuas);
             layerTitik.addTo(map);
+            ensureBatasLayer();
             setActiveBtn('btn-layer-titik');
         });
 
@@ -434,6 +561,7 @@
             map.removeLayer(layerTitik);
             map.removeLayer(layerRuas);
             layerJukir.addTo(map);
+            ensureBatasLayer();
             setActiveBtn('btn-layer-jukir');
         });
 
@@ -441,7 +569,19 @@
             map.removeLayer(layerTitik);
             map.removeLayer(layerJukir);
             layerRuas.addTo(map);
+            ensureBatasLayer();
             setActiveBtn('btn-layer-ruas');
+        });
+
+        document.getElementById('btn-layer-batas').addEventListener('click', function() {
+            // Toggle batas kecamatan (satu-satunya layer yang bisa dimatikan)
+            if (map.hasLayer(layerBatas)) {
+                map.removeLayer(layerBatas);
+                setActiveBtn('');
+            } else {
+                layerBatas.addTo(map);
+                setActiveBtn('btn-layer-batas');
+            }
         });
 
         // Fix size after render
