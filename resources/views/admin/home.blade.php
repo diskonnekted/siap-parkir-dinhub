@@ -31,6 +31,30 @@
       .dash-grid{margin-left:-10px;margin-right:-10px}
       .dash-grid>[class*="col-"]{padding-left:10px;padding-right:10px;margin-bottom:16px}
       @media (max-width:576px){.dash-hero{padding:16px}.dash-actions{margin-top:12px}}
+
+      /* Tombol Survei Mobile - menyolok */
+      .survei-cta{position:relative;display:flex;align-items:center;gap:14px;padding:16px 18px;margin-top:14px;border-radius:16px;background:linear-gradient(135deg,#10b981 0%,#0ea5e9 60%,#6366f1 100%);color:#fff;text-decoration:none;box-shadow:0 14px 34px rgba(16,185,129,.35),0 6px 14px rgba(99,102,241,.25);overflow:hidden;transition:transform .2s ease,box-shadow .2s ease}
+      .survei-cta:hover{transform:translateY(-2px);box-shadow:0 20px 44px rgba(16,185,129,.45),0 8px 20px rgba(99,102,241,.35);color:#fff;text-decoration:none}
+      .survei-cta:active{transform:translateY(0)}
+      .survei-cta::before{content:"";position:absolute;inset:-2px;background:linear-gradient(135deg,rgba(255,255,255,.25),transparent 50%);pointer-events:none}
+      .survei-cta .survei-cta-icon{width:54px;height:54px;border-radius:14px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28);display:flex;align-items:center;justify-content:center;font-size:26px;flex:0 0 auto;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+      .survei-cta .survei-cta-body{flex:1;min-width:0}
+      .survei-cta .survei-cta-title{font-size:17px;font-weight:800;letter-spacing:.2px;line-height:1.15;display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+      .survei-cta .survei-cta-sub{font-size:12.5px;opacity:.92;margin-top:4px;line-height:1.3}
+      .survei-cta .survei-cta-go{flex:0 0 auto;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:18px;border:1px solid rgba(255,255,255,.3)}
+      .survei-cta .badge-pwa{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.95);color:#0f766e;font-size:10.5px;font-weight:800;letter-spacing:.5px;padding:3px 8px;border-radius:999px;text-transform:uppercase;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+      .survei-cta .badge-pwa i{color:#0ea5e9}
+      .survei-cta .pulse-dot{position:absolute;top:12px;right:14px;width:10px;height:10px;border-radius:50%;background:#22d3ee;box-shadow:0 0 0 0 rgba(34,211,238,.7);animation:surveiPulse 1.8s infinite}
+      @keyframes surveiPulse{0%{box-shadow:0 0 0 0 rgba(34,211,238,.7)}70%{box-shadow:0 0 0 14px rgba(34,211,238,0)}100%{box-shadow:0 0 0 0 rgba(34,211,238,0)}}
+
+      /* Tombol Survei Mobile - versi ringkas (stat card) */
+      .survei-cta-mini{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;background:linear-gradient(135deg,#10b981 0%,#0ea5e9 100%);color:#fff;text-decoration:none;box-shadow:0 10px 24px rgba(16,185,129,.3);height:100%;transition:transform .18s ease,box-shadow .18s ease}
+      .survei-cta-mini:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(16,185,129,.4);color:#fff;text-decoration:none}
+      .survei-cta-mini .ic{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:20px;flex:0 0 auto}
+      .survei-cta-mini .tx{flex:1;min-width:0;line-height:1.2}
+      .survei-cta-mini .tx .t{font-size:14.5px;font-weight:800}
+      .survei-cta-mini .tx .s{font-size:11.5px;opacity:.9;margin-top:2px}
+      .survei-cta-mini .arr{opacity:.85}
     </style>
 
     <div class="dash-hero m-b-20">
@@ -42,6 +66,20 @@
             <span class="dash-chip"><i class="fa fa-calendar"></i> Tahun aktif: {{ session('tahun', date('Y')) }}</span>
             <span class="dash-chip"><i class="fa fa-inbox"></i> Pengaduan: {{ $pengaduan->count() }} + {{ $pengaduan_jukir->count() }}</span>
           </div>
+
+          {{-- Tombol Survei Mobile (menyolok) --}}
+          <a href="{{ route('mobile.survei.index') }}" class="survei-cta" target="_blank" rel="noopener">
+            <span class="pulse-dot" aria-hidden="true"></span>
+            <div class="survei-cta-icon"><i class="fa fa-mobile-alt"></i></div>
+            <div class="survei-cta-body">
+              <div class="survei-cta-title">
+                <span>Buka Survei Lapangan</span>
+                <span class="badge-pwa"><i class="fa fa-bolt"></i> PWA Mobile</span>
+              </div>
+              <div class="survei-cta-sub">Verifikasi jukir, input jukir/titik baru, dan marking titik parkir langsung dari HP — bisa offline.</div>
+            </div>
+            <div class="survei-cta-go"><i class="fa fa-arrow-right"></i></div>
+          </a>
         </div>
         <div class="col-md-4">
           <div class="dash-actions text-md-right">
@@ -91,6 +129,30 @@
             <div class="dash-label">Titik Parkir</div>
             <p class="dash-value">{{ $tikir }}</p>
           </div>
+        </a>
+      </div>
+    </div>
+
+    {{-- Baris pintas Mobile (Survei + Peta) --}}
+    <div class="row dash-grid">
+      <div class="col-lg-6 col-sm-6" style="margin-bottom:16px">
+        <a class="survei-cta-mini" href="{{ route('mobile.survei.index') }}" target="_blank" rel="noopener">
+          <div class="ic"><i class="fa fa-clipboard-check"></i></div>
+          <div class="tx">
+            <div class="t">Survei Lapangan</div>
+            <div class="s">Verifikasi & input jukir/titik — bisa offline</div>
+          </div>
+          <div class="arr"><i class="fa fa-arrow-right"></i></div>
+        </a>
+      </div>
+      <div class="col-lg-6 col-sm-6" style="margin-bottom:16px">
+        <a class="survei-cta-mini" href="{{ route('mobile.survei.peta') }}" target="_blank" rel="noopener" style="background:linear-gradient(135deg,#0ea5e9 0%,#6366f1 100%);box-shadow:0 10px 24px rgba(14,165,233,.3)">
+          <div class="ic"><i class="fa fa-map-marked-alt"></i></div>
+          <div class="tx">
+            <div class="t">Peta Titik Parkir</div>
+            <div class="s">Lihat semua titik Banjarnegara di peta mobile</div>
+          </div>
+          <div class="arr"><i class="fa fa-arrow-right"></i></div>
         </a>
       </div>
     </div>
