@@ -140,3 +140,36 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('pengelola/update_jukir/{id}', [PengelolaController::class, 'update_jukir'])->name('pengelola.update_jukir');
     Route::post('pengelola/update_jukir_action/{id}', [PengelolaController::class, 'update_jukir_action'])->name('pengelola.update_jukir_action');
 });
+
+// =========================================================================
+//  MOBILE / PWA - Survei Lapangan (terpisah dari halaman web admin)
+// =========================================================================
+use App\Http\Controllers\Mobile\SurveiController;
+
+Route::middleware(['auth'])->prefix('m')->name('mobile.')->group(function () {
+    Route::get('/', function () { return redirect()->route('mobile.survei.index'); })->name('home');
+
+    // Survei: daftar & detail penugasan (titik + jukir)
+    Route::get('survei', [SurveiController::class, 'index'])->name('survei.index');
+    Route::get('survei/read/{id}', [SurveiController::class, 'read'])->name('survei.read');
+
+    // Peta seluruh titik parkir Banjarnegara
+    Route::get('peta', [SurveiController::class, 'peta'])->name('survei.peta');
+
+    // Verifikasi jukir di lapangan
+    Route::post('survei/verifikasi_jukir/{id}', [SurveiController::class, 'verifikasi_jukir'])->name('survei.verifikasi_jukir');
+    Route::post('survei/unverifikasi_jukir/{id}', [SurveiController::class, 'unverifikasi_jukir'])->name('survei.unverifikasi_jukir');
+
+    // Jukir: tambah / edit
+    Route::get('survei/jukir/add', [SurveiController::class, 'jukir_add'])->name('survei.jukir_add');
+    Route::get('survei/jukir/edit/{id}', [SurveiController::class, 'jukir_edit'])->name('survei.jukir_edit');
+    Route::post('survei/jukir/save', [SurveiController::class, 'jukir_save'])->name('survei.jukir_save');
+
+    // Titik parkir: marking koordinat + penamaan (tambah / edit)
+    Route::get('survei/titik/add', [SurveiController::class, 'titik_add'])->name('survei.titik_add');
+    Route::get('survei/titik/edit/{id}', [SurveiController::class, 'titik_edit'])->name('survei.titik_edit');
+    Route::post('survei/titik/save', [SurveiController::class, 'titik_save'])->name('survei.titik_save');
+
+    // Util dropdown desa
+    Route::get('survei/desa_json/{id_kecamatan}', [SurveiController::class, 'desa_json'])->name('survei.desa_json');
+});

@@ -200,6 +200,7 @@
                     <li class="nav-item"><a class="nav-link" href="#about">Tentang</a></li>
                     <li class="nav-item"><a class="nav-link" href="#services">Layanan</a></li>
                     <li class="nav-item"><a class="nav-link" href="#pricing">Biaya Parkir</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('mobile.home') }}"><i class="bi bi-clipboard2-check me-1"></i>Survei Lapangan</a></li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Pengelola</a>
                         <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-4 mt-2">
@@ -230,6 +231,7 @@
                 <li class="nav-item"><a class="nav-link" href="#about">Tentang</a></li>
                 <li class="nav-item"><a class="nav-link" href="#services">Layanan</a></li>
                 <li class="nav-item"><a class="nav-link" href="#pricing">Biaya Parkir</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('mobile.home') }}"><i class="bi bi-clipboard2-check me-1"></i>Survei Lapangan</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('admin.login') }}">Login Pengelola</a></li>
             </ul>
         </div>
